@@ -12,13 +12,53 @@ const getMySentFundsTransactionsListFromOtherAccountRouter = express.Router();
 
 module.exports={
     sendAmountFromOneAccountToOtherRouter:sendAmountFromOneAccountToOtherRouter.post("/sendAmountFromOneAccountToOther",(req,resp)=>{
-        const {ammount,senderAccountAddress,recieverAccountAddress}=req.body;
+        const {ammount,senderAccountAddress,senderAccountPin,recieverAccountAddress,gasPrice,gasLimit}=req.body;
+        web3.eth.getTransactionCount(senderAccountAddress, (err, txCount) => {
+            //Got the transaction count.
+            //unlocking account
+             web3.eth.personal.unlockAccount(senderAccountAddress,senderAccountPin, 5000)
+             .then(()=>{
+                 //signing a transaction
+                web3.eth.signTransaction({
+                  nonce:  web3.utils.toHex(txCount),
+                  from : senderAccountAddress,
+                  to:      recieverAccountAddress,
+                  value:    web3.utils.toHex(web3.utils.toWei(ammount, 'ether')),
+                  gasLimit: web3.utils.toHex(gasLimit),
+                  gasPrice: web3.utils.toHex(web3.utils.toWei(gasPrice, 'gwei'))
+                },senderAccountPin).then((signedTransaction)=>{
+                //Sending signed transaction
+                        // console.log(signedTransaction.tx)
+                        web3.eth.personal.sendTransaction({
+                            // nonce:    signedTransaction.tx.nonce,
+                            from : senderAccountAddress,
+                            to:       signedTransaction.tx.to,
+                            value:    signedTransaction.tx.value,
+                            gasLimit: signedTransaction.tx.gasLimit,
+                            gasPrice: signedTransaction.tx.gasPrice,
+                            maxPriorityFeePerGas: signedTransaction.tx.maxPriorityFeePerGas,
+                            maxFeePerGas: signedTransaction.tx.maxFeePerGas,
+                            gas: signedTransaction.tx.gas,
+                            input: signedTransaction.tx.input,
+                            v: signedTransaction.tx.input,
+                            r:
+                            signedTransaction.tx.r,
+                            s:
+                            signedTransaction.tx.s,
+                            hash:
+                            signedTransaction.tx.hash
+                        },senderAccountPin).then((txtHash)=>{
+                            resp.status(200).send({
+                                responsePlayload:true,
+                                responseMessage:"Amount: "+ammount+" sent from: "+senderAccountAddress+" to: "+recieverAccountAddress+" Since transaction hash is : "+txtHash,
+                                responseCode:807
+                            })
+                        }); 
 
-        resp.status(200).send({
-            responsePlayload:true,
-            responseMessage:"Amount: "+ammount+" sent from: "+senderAccountAddress+" to: "+recieverAccountAddress,
-            responseCode:807
+                    })
+            })
         })
+        
     }),
 
     getSentFundsTransactionsListByAccountAddressRouter:getSentFundsTransactionsListByAccountAddressRouter.post("/getSentFundsTransactionsListByAccountAddress",(req,resp)=>{

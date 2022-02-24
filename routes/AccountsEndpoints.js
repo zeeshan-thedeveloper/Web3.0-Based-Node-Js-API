@@ -4,6 +4,7 @@ const {web3} = require('./blockchainConnector');
 
 var createAccountRouter = express.Router();
 var getBalanceByAccountAddressRouter = express.Router();
+var getListOfOrganizationRouter=express.Router();
 
 module.exports={ 
     createAccountRouter:createAccountRouter.post("/createAccount",(req,resp)=>{
@@ -15,11 +16,11 @@ module.exports={
 
         if(email!=null&&password!=null&&pin!=null)
         {
-            web3.eth.personal.newAccount(password) //!@superpassword
+            web3.eth.personal.newAccount(pin) //!@superpassword
             .then((address)=>{
                 //Account created on blockchain
                 admin
-                .auth()
+                .auth() 
                 .createUser({
                   email: email,
                   phoneNumber: phoneNumber,
