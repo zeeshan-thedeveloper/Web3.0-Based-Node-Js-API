@@ -4,7 +4,7 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
-const {createAccountRouter} = require("./routes/AccountsEndpoints")
+const {createAccountRouter,getBalanceByAccountAddressRouter} = require("./routes/AccountsEndpoints")
 const {signInRouter} = require("./routes/AuthenticationEndpoints")
 var app = express();
 
@@ -19,6 +19,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/AccountEndpoints', createAccountRouter);
+app.use('/AccountEndpoints', getBalanceByAccountAddressRouter);
+
+
 app.use('/AuthenticationEndpoints', signInRouter);
 
 // catch 404 and forward to error handler

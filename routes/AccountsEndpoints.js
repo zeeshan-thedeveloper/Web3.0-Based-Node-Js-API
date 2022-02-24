@@ -3,6 +3,7 @@ const {firebase,admin,ref} = require('./firebaseConnector')
 const {web3} = require('./blockchainConnector');
 
 var createAccountRouter = express.Router();
+var getBalanceByAccountAddressRouter = express.Router();
 
 module.exports={ 
     createAccountRouter:createAccountRouter.post("/createAccount",(req,resp)=>{
@@ -55,7 +56,7 @@ module.exports={
                                 firstName:req.body.firstName,
                                 lastName:req.body.lastName,
                                 userUid:user.uid,
-                                emai:req.body.email,
+                                email:req.body.email,
                                 blockchainAccountAddress:address
                               },(error)=>{
                                   if(error){
@@ -118,5 +119,18 @@ module.exports={
             });    
         }  
 
+    }),
+    getBalanceByAccountAddressRouter:getBalanceByAccountAddressRouter.post("/getBalanceByAccountAddress",(req,resp)=>{
+        const {accountAddress}=req.body;
+        web3.eth.getBalance(accountAddress, (err, wei) => {
+
+            var balance = web3.utils.fromWei(wei, 'ether');
+            resp.status(200).send({
+                responsePayload:balance,
+                responseMessage:"Account balance with address : "+accountAddress+" is :"+balance,
+                responseCode:806
+            })
+        })
+        
     })
 }
