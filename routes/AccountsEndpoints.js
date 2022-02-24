@@ -10,7 +10,7 @@ module.exports={
 
         const {
             email,password,pin,displayName,address,onlineStatus,photoUrl,
-            firstName,lastName,accountType,phoneNumber
+            firstName,lastName,accountType,phoneNumber,description
         } = req.body;
 
         if(email!=null&&password!=null&&pin!=null)
@@ -45,7 +45,8 @@ module.exports={
                               //Now we will create an account on blockchain
                               //will store the account address in realtime database.
                               
-                              if(req.body.accountType=="Individual"){
+                              if(req.body.accountType=="Individual")
+                              {
                               //Add in the list of Individual account
                               
                               //Storing over real time database.    
@@ -75,8 +76,38 @@ module.exports={
                                     }); 
                                   }
                               })
+
                               }else{
                                   //Add in the list of Organization account
+                              
+                              //Storing over real time database.    
+                              const usersRef = ref.child('Organizations');
+                              
+                              usersRef.child(user.uid).set({
+                                //This will be stored over real time database.
+                                description:description,
+                                title:displayName,
+                                userUid:user.uid,
+                                email:req.body.email,
+                                blockchainAccountAddress:address
+                              },(error)=>{
+                                  if(error){
+                                    console.log("Could not write data on realtime database.")
+                                    resp.status(200).send({
+                                        responsePayload:null,
+                                        responseMessage:"Verification Email Sent, But could not write on the real time database so please contact the support team.",
+                                        responseCode:812
+                                    }); 
+                                  }else{
+                                    console.log("Sucessfuly written on realtime database.")
+                                    resp.status(200).send({
+                                        responsePayload:null,
+                                        responseMessage:"Verification Email Sent, Please verify it.",
+                                        responseCode:813
+                                    }); 
+                                  }
+                              })
+                              
                               } 
         
                           }).catch((error)=>{
