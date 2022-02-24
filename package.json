@@ -16,7 +16,10 @@
     "http-errors": "~1.6.3",
     "jade": "~1.11.0",
     "morgan": "~1.9.1",
-    "nodemon": "^2.0.15"
+    "nodemon": "^2.0.15",
+    "web3": "^1.7.0",
+    "web3-eth-accounts": "^1.7.0",
+    "web3-eth-personal": "^1.7.0"
   },
   "devDependencies": {
     "kill-port": "^1.6.1"
