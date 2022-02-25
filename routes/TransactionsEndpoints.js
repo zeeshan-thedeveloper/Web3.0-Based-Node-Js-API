@@ -6,7 +6,6 @@ const {web3} = require('./blockchainConnector');
 const sendAmountFromOneAccountToOtherRouter=express.Router();
 //Getting list of transactions
 const getSentRecievedFundsTransactionsListByAccountAddressRouter = express.Router();
-const getTransactionRelatedUserDataRouter=express.Router();
 const getPendingTransactionListByAccountAddressRouter = express.Router();
 const getMySentFundsTransactionsListFromOtherAccountRouter = express.Router();
 
@@ -142,25 +141,28 @@ module.exports={
             responseCode:810
         })
     }),
+
     getPendingTransactionListByAccountAddressRouter:getPendingTransactionListByAccountAddressRouter.post("/getPendingTransactionListByAccountAddress",(req,resp)=>{
         const {targetAccountAddress}=req.body;
-        var transactionList;
-
-        resp.status(200).send({
-            responsePlayload:transactionList,
-            responseMessage:"List of your,Mr :"+targetAccountAddress+", pending transactions "+transactionList,
-            responseCode:811
-        })
-    }),
-    getTransactionRelatedUserDataRouter:getTransactionRelatedUserDataRouter.post("/getTransactionRelatedUserDataRouter",(req,resp)=>{
-        const {transactionList}=req.body;
-        var dataToSendList=[];
-
-        resp.status(200).send({
-            responsePlayload:dataToSendList,
-            responseMessage:"Details of all transactions",
-            responseCode:812
-        })
-    })
-    
+        var transactionList=[];
+        //We will return a lis of transaction respective to a account which are pending.
+        web3.eth.getPendingTransactions().then((listOfPendingTransactions)=>{
+            console.log(listOfPendingTransactions)
+            //Access the database to get extra info. after the create a list of transaction which belong the traget account.
+            listOfPendingTransactions.forEach((trnas)=>{
+                if(trnas.from.toLowerCase()==targetAccountAddress.toLowerCase()){
+                    transactionList.push({
+                        toHash:trnas.to,
+                        transactionHash:trnas.hash,
+                        account:web3.utils.fromWei(trnas.value, 'ether')
+                    })
+                }
+            })
+            resp.status(200).send({
+                responsePlayload:transactionList,
+                responseMessage:"List of your,Mr :"+targetAccountAddress+", pending transactions "+transactionList,
+                responseCode:811
+            })
+        });
+    }),   
 }
