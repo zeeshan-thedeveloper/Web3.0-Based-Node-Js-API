@@ -12,9 +12,9 @@ const {
 const {
   sendAmountFromOneAccountToOtherRouter,
   getPendingTransactionListByAccountAddressRouter,
-  getSentFundsTransactionsListByAccountAddressRouter,
-  getRecievedFundsTransactionsListByAccountAddressRouter,
-  getMySentFundsTransactionsListFromOtherAccountRouter
+  getSentRecievedFundsTransactionsListByAccountAddressRouter,
+  getMySentFundsTransactionsListFromOtherAccountRouter,
+  getTransactionRelatedUserDataRouter
 } = require("./routes/TransactionsEndpoints")
 
 const {signInRouter} = require("./routes/AuthenticationEndpoints")
@@ -37,9 +37,9 @@ app.use('/AuthenticationEndpoints', signInRouter);
 
 app.use('/TransactionsEndpoints', sendAmountFromOneAccountToOtherRouter);
 app.use('/TransactionsEndpoints', getPendingTransactionListByAccountAddressRouter);
-app.use('/TransactionsEndpoints', getSentFundsTransactionsListByAccountAddressRouter);
-app.use('/TransactionsEndpoints', getRecievedFundsTransactionsListByAccountAddressRouter);
+app.use('/TransactionsEndpoints', getSentRecievedFundsTransactionsListByAccountAddressRouter);
 app.use('/TransactionsEndpoints', getMySentFundsTransactionsListFromOtherAccountRouter);
+app.use('/TransactionsEndpoints', getTransactionRelatedUserDataRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

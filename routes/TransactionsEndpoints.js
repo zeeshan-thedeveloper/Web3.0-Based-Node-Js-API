@@ -5,8 +5,8 @@ const {web3} = require('./blockchainConnector');
 //Making transactions fom one account to other.
 const sendAmountFromOneAccountToOtherRouter=express.Router();
 //Getting list of transactions
-const getSentFundsTransactionsListByAccountAddressRouter = express.Router();
-const getRecievedFundsTransactionsListByAccountAddressRouter = express.Router();
+const getSentRecievedFundsTransactionsListByAccountAddressRouter = express.Router();
+const getTransactionRelatedUserDataRouter=express.Router();
 const getPendingTransactionListByAccountAddressRouter = express.Router();
 const getMySentFundsTransactionsListFromOtherAccountRouter = express.Router();
 
@@ -61,104 +61,68 @@ module.exports={
         
     }),
 
-    getSentFundsTransactionsListByAccountAddressRouter:getSentFundsTransactionsListByAccountAddressRouter.post("/getSentFundsTransactionsListByAccountAddress",(req,resp)=>{
+    getSentRecievedFundsTransactionsListByAccountAddressRouter:getSentRecievedFundsTransactionsListByAccountAddressRouter.post("/getSentRecievedFundsTransactionsListByAccountAddress",(req,resp)=>{
         const {targetAccountAddress}=req.body;
-        var transactionList =[];
+        var sentFundsTransactionList =[];
+        var recievedFundsTransactionList =[];
+        
         //getting block number so that we can traverse till that block.
         web3.eth.getBlockNumber()
         .then((currentTotalBlocknumber)=>{
+
             //Getting total transactions done from
             web3.eth.getTransactionCount(targetAccountAddress)
             .then((totalDoneTransactionsByTargetAccount)=>{
                 //Now we will traverse the block chain till we have found number 
                 //of transactions equal to totalDoneTransactionsByTargetAccount
-                const tempTransDataHolder=[];
-                
-                let traverseBlocks = new Promise( function (traverseBlock_Reject,traverseBlock_Resolve) {
-                    
-                    for(var blockNumber=0;blockNumber<currentTotalBlocknumber;){
-                            // web3.eth.getBlock(blockNumber).then((b_detail)=>{
-                            // })
-                        let acessEachBlock = new Promise(function (acessEachBlock_Reject,acessEachBlock_Resolve) {
-                         setInterval(() => {
-                            acessEachBlock_Resolve("Go ahead")
-                         }, 3000);
-                                    //     // let getTransFromBlock = new Promise(new function (getTransFromBlock_Reject,getTransFromBlock_Resolve) {
-                                    //     //     //This will be resolve when a block is accesses and traversed.. end of each for-each..
-                                    //     // })
-                                    //     //This will be resolve when all blocks are access or when outer loop is ended..
-                        
-                        })
+              
+                const traverseBlocks = async ()=>{
 
-                        //This will be resolve when all blocks are traversed.
-                        acessEachBlock.then((sucess)=>{
-                            console.log("Increasing index :"+sucess)
-                            blockNumber++;
-                        },(error)=>{
-                            console.log(error)
-                        })
+                    for(var blockNumber=0;blockNumber<currentTotalBlocknumber;blockNumber++){
+
+                            const c =await web3.eth.getBlock(blockNumber).then((b_detail)=>{
+                               
+                                if(b_detail.transactions.length>0){
+                                    
+                                    console.log("Reding  block having transactions")
+                                    b_detail.transactions.forEach(function(e) {
+                                        web3.eth.getTransaction(e)
+                                        .then((transactionReciept)=>{
+                                            console.log(transactionReciept)
+                                            if(transactionReciept.from.toLowerCase()==targetAccountAddress.toLowerCase())
+                                             {
+                                                 sentFundsTransactionList.push({
+                                                 tranHash:transactionReciept.hash,
+                                                 toHash:transactionReciept.to,
+                                                 ammount:web3.utils.fromWei(transactionReciept.value, 'ether')
+                                                 })
+                                            }
+                                            if(transactionReciept.to.toLowerCase()==targetAccountAddress.toLowerCase())
+                                             {
+                                                 recievedFundsTransactionList.push({
+                                                 tranHash:transactionReciept.hash,
+                                                 fromHash:transactionReciept.from,
+                                                 ammount:web3.utils.fromWei(transactionReciept.value, 'ether')
+                                                 })
+                                            }
+                                            
+                                        })
+                                    })
+                                }
+                            })
                     }
-                    traverseBlock_Resolve(tempTransDataHolder)
-                })
 
-                traverseBlocks.then((sucess)=>{
                     resp.status(200).send({
-                        responsePlayload:sucess,
-                        responseMessage:"List of your, Mr :"+targetAccountAddress+", spent fund's transactions : "+transactionList,
+                        responsePlayload:{
+                            sentFundsTransactionList:sentFundsTransactionList,
+                            recievedFundsTransactionList:recievedFundsTransactionList
+                        },
+                        responseMessage:"List of your, Mr :"+targetAccountAddress+", spent fund's transactions : "+sentFundsTransactionList+" and recieved fund's transaction list:"+recievedFundsTransactionList,
                         responseCode:808
                     })
-                },(error)=>{
-                    resp.status(200).send({
-                        responsePlayload:error,
-                        responseMessage:"List of your, Mr :"+targetAccountAddress+", spent fund's transactions : "+transactionList,
-                        responseCode:808
-                    })
-                })
-                
+                }
 
-                // for(var blockNumber=0;blockNumber<currentTotalBlocknumber;blockNumber++){
-
-                //     web3.eth.getBlock(blockNumber).then((b_detail)=>{
-                //         if(b_detail.transactions.length>0){
-                //             b_detail.transactions.forEach(function(e) {
-                //                 web3.eth.getTransaction(e)
-                //                 .then((transactionReciept)=>{
-                //                     // console.log(transactionReciept)
-                //                     if(transactionReciept.from.toLowerCase()==targetAccountAddress.toLowerCase())
-                //                     {
-                //                         // console.log(transactionReciept.to)
-                //                         tempTransDataHolder.push({
-                //                         toHash:transactionReciept.to,
-                //                         ammount:web3.utils.fromWei(transactionReciept.value, 'ether')
-                //                         })
-                //                         console.log(tempTransDataHolder)
-                //                     }
-                //                 })
-                //             })
-                //         }
-
-                //     })
-                // }
-
-                // console.log(tempTransDataHolder)
-                // {
-                //     responsePayload:[
-                //         {
-                //             transactionSentFromHashAddress:"",
-                //             transactionSentToHashAddress:"",
-                //             transactionAmount:"",
-                //             transactionSentToFirstName:"",
-                //             transactionSentToLastName:"",
-                //             transactionSentToEmail:"",
-                //             transactionSentToAccountHashAddress:"",
-                //             transactionHash:""
-                //         },
-                //         {....},
-                //         {....}
-                //     ],
-                //     responseMessage:"Transactions list :",
-                //     responseCode:805
-                // }
+                traverseBlocks();
                 
             })
         })
@@ -166,17 +130,6 @@ module.exports={
         
     }),
 
-    getRecievedFundsTransactionsListByAccountAddressRouter:getRecievedFundsTransactionsListByAccountAddressRouter.post("/getRecievedFundsTransactionsListByAccountAddress",(req,resp)=>{
-        const {targetAccountAddress}=req.body;
-
-        var transactionList;
-
-        resp.status(200).send({
-            responsePlayload:transactionList,
-            responseMessage:"List of your, Mr :"+targetAccountAddress+", recieved fund's transactions : "+transactionList,
-            responseCode:809
-        })
-    }),
 
     getMySentFundsTransactionsListFromOtherAccountRouter:getMySentFundsTransactionsListFromOtherAccountRouter.post("/getMySentFundsTransactionsListFromOtherAccount",(req,resp)=>{
         const {targetAccountAddress,accountToInvestigate}=req.body;
@@ -198,5 +151,16 @@ module.exports={
             responseMessage:"List of your,Mr :"+targetAccountAddress+", pending transactions "+transactionList,
             responseCode:811
         })
+    }),
+    getTransactionRelatedUserDataRouter:getTransactionRelatedUserDataRouter.post("/getTransactionRelatedUserDataRouter",(req,resp)=>{
+        const {transactionList}=req.body;
+        var dataToSendList=[];
+
+        resp.status(200).send({
+            responsePlayload:dataToSendList,
+            responseMessage:"Details of all transactions",
+            responseCode:812
+        })
     })
+    
 }
