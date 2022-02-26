@@ -4,22 +4,32 @@ var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 
+//Account end-points.
 const {
   createAccountRouter,
   getBalanceByAccountAddressRouter
 }= require("./routes/AccountsEndpoints")
 
+//Transactions end-points
 const {
   sendAmountFromOneAccountToOtherRouter,
   getPendingTransactionListByAccountAddressRouter,
   getSentRecievedFundsTransactionsListByAccountAddressRouter,
   getMySentFundsTransactionsListFromOtherAccountRouter,
-  
 } = require("./routes/TransactionsEndpoints")
 
-const {signInRouter} = require("./routes/AuthenticationEndpoints")
-var app = express();
 
+//Authentication end-points.
+const {signInRouter} = require("./routes/AuthenticationEndpoints")
+
+//Contract end-points.
+const {
+  deployContractRouter,
+  getDataFromBlockchainRotuer,
+  storeDataOnBlockchainRouter
+}=require("./routes/ContractEndpoints")
+
+var app = express();
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -39,6 +49,12 @@ app.use('/TransactionsEndpoints', sendAmountFromOneAccountToOtherRouter);
 app.use('/TransactionsEndpoints', getPendingTransactionListByAccountAddressRouter);
 app.use('/TransactionsEndpoints', getSentRecievedFundsTransactionsListByAccountAddressRouter);
 app.use('/TransactionsEndpoints', getMySentFundsTransactionsListFromOtherAccountRouter);
+
+app.use('/ContractEndpoints',deployContractRouter);
+app.use('/ContractEndpoints',storeDataOnBlockchainRouter);
+app.use('/ContractEndpoints',getDataFromBlockchainRotuer);
+
+
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
