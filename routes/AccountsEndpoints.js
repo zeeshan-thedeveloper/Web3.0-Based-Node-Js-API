@@ -150,7 +150,7 @@ module.exports={
                 }); 
             })
         }
-        
+
         else{
             resp.status(200).send({
                 responsePayload:null,
@@ -162,8 +162,10 @@ module.exports={
     }),
     getBalanceByAccountAddressRouter:getBalanceByAccountAddressRouter.post("/getBalanceByAccountAddress",(req,resp)=>{
         const {accountAddress}=req.body;
+       
         web3.eth.getBalance(accountAddress, (err, wei) => {
-
+           
+            console.log(err)
             var balance = web3.utils.fromWei(wei, 'ether');
             resp.status(200).send({
                 responsePayload:balance,
@@ -171,6 +173,6 @@ module.exports={
                 responseCode:806
             })
         })
-        
+
     })
 }
