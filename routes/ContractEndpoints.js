@@ -54,27 +54,51 @@ module.exports={
     }),
 
     storeDataOnBlockchainRouter:storeDataOnBlockchainRouter.post("/storeDataOnBlockchain",(req,resp)=>{
-        const {dataToStore,requestingAccountAddress,contractAddress} = req.body;
-        const contract = new web3.eth.Contract(contractABI,contractAddress);
-        
-        contract.methods.store(dataToStore).send({from: requestingAccountAddress}).then((result)=>{ //Note we use send method when we have to update the blockchain state.
-            console.log(result)
-            resp.status(200).send({
-                responsePlayload:true,
-                responseMessage:"Data : "+dataToStore+" stored on block chain sucessfully with account address :"+requestingAccountAddress+" Response is :"+result,
-                responseCode:813 
+        const {dataToStore,requestingAccountAddress,requestingAccountPin,contractAddress} = req.body;
+        web3.eth.personal.unlockAccount(requestingAccountAddress,requestingAccountPin, 5000)
+        .then(()=>{
+            console.log("Account "+requestingAccountAddress+" unlocked")
+            const contract = new web3.eth.Contract(contractABI,contractAddress);
+            contract.methods.store(dataToStore).send({from: requestingAccountAddress}).then((result)=>{ //Note we use send method when we have to update the blockchain state.
+                console.log(result)
+                resp.status(200).send({
+                    responsePlayload:true,
+                    responseMessage:"Data : "+dataToStore+" stored on block chain sucessfully with account address :"+requestingAccountAddress+" Response is :"+result,
+                    responseCode:813 
+                })
+            }).catch((error)=>{
+                resp.status(200).send({
+                    responsePlayload:error.message,
+                    responseMessage:"We can store data with contract, with address :"+contractAddress+" can be accessed with its owner only",
+                    responseCode:816
+                })
             })
         })
     }),
 
     getDataFromBlockchainRotuer:getDataFromBlockchainRotuer.post("/getDataFromBlockchain",(req,resp)=>{
-        const {dataFetchRequestingAccountAddress,dataFetchRequestingAccountPin}=req.body;
-        var  fetchedData=null;
-
-        resp.status(200).send({
-            responsePlayload:true,
-            responseMessage:"Data : Fetch"+fetchedData+" for Mr:"+dataFetchRequestingAccountAddress,
-            responseCode:814
+        const {keyToFindData,dataFetchRequestingAccountAddress,dataFetchRequestingAccountPin,contractAddress}=req.body;
+        
+        web3.eth.personal.unlockAccount(dataFetchRequestingAccountAddress,dataFetchRequestingAccountPin, 5000)
+        .then(()=>{
+            console.log("Account :"+dataFetchRequestingAccountAddress+" unclocked")
+            const contract = new web3.eth.Contract(contractABI,contractAddress);
+            contract.methods.retrieve(keyToFindData).call({from: dataFetchRequestingAccountAddress}).then((result)=>{
+                console.log(result)
+                resp.status(200).send({
+                    responsePlayload:result,
+                    responseMessage:"Data : Fetch"+result+" for Mr:"+dataFetchRequestingAccountAddress+" and data is:"+result,
+                    responseCode:814
+                })
+            }).catch((error)=>{
+                resp.status(200).send({
+                    responsePlayload:error.message,
+                    responseMessage:"We can access data from contract, with address :"+contractAddress+" can be accessed with its owner only",
+                    responseCode:815
+                })
+            })
         })
+       
+        
     })
 }

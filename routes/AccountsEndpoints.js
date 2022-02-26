@@ -141,8 +141,16 @@ module.exports={
                             responseCode:errorCode
                     })
                 })
+            }).catch((error)=>{
+                console.log(error.message)
+                resp.status(200).send({
+                    responsePayload:error.message,
+                    responseMessage:"Please make sure your block chain node is running.!!",
+                    responseCode:816
+                }); 
             })
         }
+        
         else{
             resp.status(200).send({
                 responsePayload:null,
