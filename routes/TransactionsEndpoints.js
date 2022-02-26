@@ -52,10 +52,31 @@ module.exports={
                                 responseMessage:"Amount: "+ammount+" sent from: "+senderAccountAddress+" to: "+recieverAccountAddress+" Since transaction hash is : "+txtHash,
                                 responseCode:807
                             })
-                        }); 
+                        }).catch((error)=>{
+                            console.log(error.message)
+                            console.log("Error in sending signed transactions..!")
+                            resp.status(200).send({
+                                responsePlayload:error.message,
+                                responseMessage:"Please provide enough gas ammount to process transaction",
+                                responseCode:818
+                            })
+                        }) 
 
+                    }).catch((error)=>{
+                        console.log(error.message)
+                        console.log("Error in siging transaction")
                     })
+            }).catch((error)=>{
+                console.log(error.message)
+                console.log("Error in unlocking account")
+                resp.status(200).send({
+                    responsePlayload:error.message,
+                    responseMessage:"Plear provide your private key or check the reciver account address to unlock account and process transaction",
+                    responseCode:818
+                })
             })
+        }).catch((error)=>{
+            console.log("Error in getting count of transactions aleardy done with this account.")
         })
         
     }),
@@ -105,9 +126,15 @@ module.exports={
                                                  })
                                             }
                                             
+                                        }).catch((error)=>{
+                                            console.log(error.message)
+                                            console.log("Error in geting transaction details")
                                         })
                                     })
                                 }
+                            }).catch((error)=>{
+                                console.log(error.message)
+                                console.log("Error in geting block details")
                             })
                     }
 
@@ -123,6 +150,17 @@ module.exports={
 
                 traverseBlocks();
                 
+            }).catch((error)=>{
+                console.log(error.message)
+                console.log("Error in count of transactions")
+            })
+        }).catch((error)=>{
+            console.log(error.message)
+            console.log("Error in geting block number")
+            resp.status(200).send({
+                responsePlayload:error.message,
+                responseMessage:"Make sure your node is running",
+                responseCode:819
             })
         })
 
@@ -130,18 +168,7 @@ module.exports={
     }),
 
 
-    getMySentFundsTransactionsListFromOtherAccountRouter:getMySentFundsTransactionsListFromOtherAccountRouter.post("/getMySentFundsTransactionsListFromOtherAccount",(req,resp)=>{
-        const {targetAccountAddress,accountToInvestigate}=req.body;
-
-        var transactionList;
-
-        resp.status(200).send({
-            responsePlayload:transactionList,
-            responseMessage:"List of your,Mr :"+targetAccountAddress+", donation usage transaction from account : "+accountToInvestigate+" is :"+transactionList,
-            responseCode:810
-        })
-    }),
-
+   
     getPendingTransactionListByAccountAddressRouter:getPendingTransactionListByAccountAddressRouter.post("/getPendingTransactionListByAccountAddress",(req,resp)=>{
         const {targetAccountAddress}=req.body;
         var transactionList=[];
@@ -163,6 +190,12 @@ module.exports={
                 responseMessage:"List of your,Mr :"+targetAccountAddress+", pending transactions "+transactionList,
                 responseCode:811
             })
-        });
+        }).catch((error)=>{
+            resp.status(200).send({
+                responsePlayload:error.message,
+                responseMessage:"Please make sure you node is running or your provide hash is correct. For futher details watch message payload.",
+                responseCode:820
+            }) 
+        })
     }),   
 }

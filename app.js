@@ -15,7 +15,7 @@ const {
   sendAmountFromOneAccountToOtherRouter,
   getPendingTransactionListByAccountAddressRouter,
   getSentRecievedFundsTransactionsListByAccountAddressRouter,
-  getMySentFundsTransactionsListFromOtherAccountRouter,
+  
 } = require("./routes/TransactionsEndpoints")
 
 
@@ -48,7 +48,6 @@ app.use('/AuthenticationEndpoints', signInRouter);
 app.use('/TransactionsEndpoints', sendAmountFromOneAccountToOtherRouter);
 app.use('/TransactionsEndpoints', getPendingTransactionListByAccountAddressRouter);
 app.use('/TransactionsEndpoints', getSentRecievedFundsTransactionsListByAccountAddressRouter);
-app.use('/TransactionsEndpoints', getMySentFundsTransactionsListFromOtherAccountRouter);
 
 app.use('/ContractEndpoints',deployContractRouter);
 app.use('/ContractEndpoints',storeDataOnBlockchainRouter);

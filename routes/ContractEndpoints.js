@@ -23,7 +23,13 @@ module.exports={
             }, function (e, contract){
             // console.log(e, contract);
             }).on('error', function(error){ 
-             console.log(error)
+            console.log(error.message)
+            console.log("Error in deploying contract")
+            resp.status(200).send({
+                responsePlayload:error.message,
+                responseMessage:"For futher details watch message payload",
+                responseCode:822
+            })
             }).on('transactionHash', function(transactionHash){
             //   console.log(transactionHash)
             })
@@ -50,6 +56,14 @@ module.exports={
                                 responseCode:812
                             })
             })
+        }).catch((error)=>{
+            console.log(error.message)
+            console.log("Error in unlocking account")
+            resp.status(200).send({
+                responsePlayload:error.message,
+                responseMessage:"Please make sure your node is running or the key you have provided is correct, for futher details watch message payload",
+                responseCode:821 
+            })
         })
     }),
 
@@ -72,6 +86,14 @@ module.exports={
                     responseMessage:"We can store data with contract, with address :"+contractAddress+" can be accessed with its owner only",
                     responseCode:816
                 })
+            })
+        }).catch((error)=>{
+            console.log(error.message)
+            console.log("Error in unlocking account")
+            resp.status(200).send({
+                responsePlayload:error.message,
+                responseMessage:"Please make sure your node is running or the key you have provided is correct, for futher details watch message payload",
+                responseCode:821 
             })
         })
     }),
@@ -96,6 +118,14 @@ module.exports={
                     responseMessage:"We can access data from contract, with address :"+contractAddress+" can be accessed with its owner only",
                     responseCode:815
                 })
+            })
+        }).catch((error)=>{
+            console.log(error.message)
+            console.log("Error in unlocking account")
+            resp.status(200).send({
+                responsePlayload:error.message,
+                responseMessage:"Please make sure your node is running or the key you have provided is correct, for futher details watch message payload",
+                responseCode:821 
             })
         })
        
